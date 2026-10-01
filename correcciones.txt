@@ -1,0 +1,15 @@
+Correcciones de las TSs
+
+TS3: Desparramo Espectral
+
+   * Falta algún desarrollo en la introducción como para presentar el trabajo que vas a hacer. Copiar y pegar 
+     la consigna es muy poco.
+   * Es mejor intercalar celdas de Markdown con celdas de Código, en la introducción tenés dos celdas de 
+     Markdown seguidas, no es un error en sí, pero hace que no quede muy buena la presentación. 
+   * Para los gráficos de los espectros es mejor usar stem o opciones de plot que muestren los puntos de la 
+     DFT (FFT), ya que el espectro no es continuo.
+   * Falta una buena sección de Conclusiones.
+   * Falta un análisis más en detalle de por qué aparecen las sincs con zero padding, cómo es el efecto en el 
+     dominio de la frecuencia de la ventana implícita y del la ventana explícita correspondiente al zero 
+     padding.
+      
