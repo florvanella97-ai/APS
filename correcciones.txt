@@ -12,4 +12,15 @@ TS3: Desparramo Espectral
    * Falta un análisis más en detalle de por qué aparecen las sincs con zero padding, cómo es el efecto en el 
      dominio de la frecuencia de la ventana implícita y del la ventana explícita correspondiente al zero 
      padding.
-      
+
+TS4: Estimadores
+
+    * Pasar el texto por un corrector.
+    * Falta trabajar más el desarrollo del Notebook. 
+    * Falta gráficos de los histogramas para la estimación de frecuencia.
+    * La frecuencia de ocurrencia está en Watts
+    * La amplitud estimada está en Amperes, ok.
+    * En la conclusión decís: "Se observa una reducción general en la varianza de los estimadores, reflejando 
+      una mayor estabilidad de las mediciones frente a la disminución del piso de ruido." Los estimadores son
+      afectados entonces por el ruido en la señal?
+    
