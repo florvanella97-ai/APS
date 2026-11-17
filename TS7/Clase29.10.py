@@ -46,6 +46,47 @@ b_win_blackman = sig.firwin2(taps_win, [0.0, wp, wp + delta_w, fs_ecg/2], [1.0, 
 
 y_min, y_max = -100, 5
 
+# Filtro FIR usando metodo de remez
+num_taps= 131
+bands = [0.0, wp, wp + delta_w, fs_ecg/2]
+desired = [1.0,0.0] #Tengo 4 valores que divide en 2 bandas, entre 0 y wp y wp+delta_w y fs/2.
+b_remez = sig.remez(num_taps, bands, desired, fs=fs_ecg)
+# --- 2. Calculamos las respuestas en frecuencia de cada uno ---
+# Para los IIR (SOS)
+w_butt, h_butt     = sig.sosfreqz(sos_butt, fs=fs_ecg)
+w_cheby2, h_cheby2 = sig.sosfreqz(sos_cheby2, fs=fs_ecg)
+w_cauer, h_cauer   = sig.sosfreqz(sos_cauer, fs=fs_ecg)
+
+# Para los FIR (Ventanas y Remez)
+w_box, h_box       = sig.freqz(b_win_boxcar, 1.0, fs=fs_ecg)
+w_ham, h_ham       = sig.freqz(b_win_hamming, 1.0, fs=fs_ecg)
+w_bla, h_bla       = sig.freqz(b_win_blackman, 1.0, fs=fs_ecg)
+w_rem, h_rem       = sig.freqz(b_remez, 1.0, fs=fs_ecg)
+
+
+# --- 3. Graficamos todo en conjunto ---
+plt.figure(figsize=(10, 6))
+
+# Dibujamos IIR
+plt.plot(w_butt, 20 * np.log10(np.abs(h_butt) + 1e-9), label='IIR Butterworth (SOS)', linestyle='-.')
+plt.plot(w_cheby2, 20 * np.log10(np.abs(h_cheby2) + 1e-9), label='IIR Cheby2 (SOS)', linestyle='-.')
+plt.plot(w_cauer, 20 * np.log10(np.abs(h_cauer) + 1e-9), label='IIR Cauer/Eliptico (SOS)', linestyle='-.')
+
+# Dibujamos FIR
+plt.plot(w_box, 20 * np.log10(np.abs(h_box) + 1e-9), label='FIR Boxcar')
+plt.plot(w_ham, 20 * np.log10(np.abs(h_ham) + 1e-9), label='FIR Hamming')
+plt.plot(w_bla, 20 * np.log10(np.abs(h_bla) + 1e-9), label='FIR Blackman')
+plt.plot(w_rem, 20 * np.log10(np.abs(h_rem) + 1e-9), label='FIR Remez', linewidth=2, color='black')
+
+# Detalles de la gráfica en escala en dB (muy útil para ver atenuaciones)
+plt.title('Comparación de Filtros IIR y FIR')
+plt.xlabel('Frecuencia [Hz]')
+plt.ylabel('Magnitud [dB]')
+plt.grid(True)
+plt.ylim(-100, 5)  # Usando tus límites y_min e y_max
+plt.axvline(wp, color='r', linestyle='--', alpha=0.7, label='Banda de paso (wp)')
+plt.legend(loc='lower left', fontsize=8)
+plt.show()
 
 #%% ................... Funciones de Respuesta en Frecuencia y Retardo ...................
 def calc_freq_sos(sos):
