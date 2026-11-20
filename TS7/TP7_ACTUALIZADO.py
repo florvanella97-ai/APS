@@ -63,7 +63,9 @@ b_ls      = sig.firls(num_taps, bands, desired_firls, fs=fs_ecg)
 b_remez   = sig.remez(num_taps, bands, desired_remez, fs=fs_ecg)
 
 
-#%% ANÁLISIS DE MÓDULO, FASE Y RETARDO: FILTROS IIR
+# ==========================================
+# 2. ANÁLISIS IIR (Módulo, Fase y Retardo)
+# ==========================================
 y_min, y_max = -100, 5
 
 def calc_resp_iir(sos, leg_str, fig_n_axes):
@@ -129,6 +131,7 @@ ax_fase.legend(loc="lower left", fontsize=8)  # Muestra los nombres de los filtr
 plt.show()
 
 #%% ANÁLISIS DE MÓDULO, FASE Y RETARDO: FILTROS FIR 
+
 def calc_resp_fir(b, leg_str, fig_n_axes):
     f, h = sig.freqz(b, 1.0, worN=8192, fs=fs_ecg)
     modulo_db = 20 * np.log10(np.maximum(np.abs(h), 1e-12))
@@ -144,14 +147,14 @@ def calc_resp_fir(b, leg_str, fig_n_axes):
     
     (fig, (ax_mod, ax_fase)) = fig_n_axes
     
-    #  Módulo FIR 
+    # Módulo FIR 
     ax_mod.plot(f, modulo_db, linewidth=1.5, label=leg_str)
     ax_mod.set_ylim(y_min, y_max)
     ax_mod.set_ylabel("Módulo (dB)")
-    ax_mod.set_title("Respuesta en Frecuencia- Filtros FIR")
+    ax_mod.set_title("Respuesta en Frecuencia - Filtros FIR")
     ax_mod.grid(True)
     
-    #Fase FIR (Linealidad) 
+    # Fase FIR (Linealidad) 
     ax_fase.plot(f, fase_rad, label=leg_str, linewidth=1.2)
     ax_fase.axvline(wp, color="gray", linestyle=":")
     ax_fase.axvline(ws, color="gray", linestyle=":")
@@ -159,23 +162,31 @@ def calc_resp_fir(b, leg_str, fig_n_axes):
     ax_fase.set_ylabel("Fase (rad)")
     ax_fase.grid(True)
     
-    #  Retardo de Grupo FIR 
-    plt.figure(4, figsize=(10, 5))
+    # Retardo de Grupo FIR (Ventana separada para cada uno)
+    plt.figure(figsize=(10, 5))
     plt.plot(f, retardo_ms_plot, label=leg_str, linewidth=1.5)
-    plt.axvline(wp, color="forestgreen", linestyle="--", label="wp = {wp} Hz")
-    plt.axvline(ws, color="firebrick", linestyle="--", label="ws = {ws} Hz")
+    plt.axvline(wp, color="forestgreen", linestyle="--", label=f"wp = {wp} Hz")
+    plt.axvline(ws, color="firebrick", linestyle="--", label=f"ws = {ws} Hz")
     plt.xlabel("Frecuencia (Hz)")
     plt.ylabel("Retardo de grupo (ms)")
-    plt.title("Retardo de grupo FIR $\\tau_g(f)$")
+    plt.title(f"Retardo de grupo FIR $\\tau_g(f)$ - {leg_str}")
     plt.grid(True, linestyle="--", alpha=0.6)
     plt.legend(loc="best", fontsize=9)
 
-fig_fir_axes = plt.subplots(2, 1, sharex=True, num=3, figsize=(10, 7), constrained_layout=True)
+
+# Ejecución FIR
+fig_fir, (ax_mod, ax_fase) = plt.subplots(2, 1, sharex=True, figsize=(10, 7), constrained_layout=True)
+fig_fir_axes = (fig_fir, (ax_mod, ax_fase))
 
 calc_resp_fir(b_ls, 'FIR Cuadrados Mínimos', fig_fir_axes)
 calc_resp_fir(b_remez, 'FIR Remez', fig_fir_axes)
-calc_resp_fir(b_hann, 'FIR hann', fig_fir_axes)
-calc_resp_fir(b_hamming, 'FIR hamming', fig_fir_axes)
+calc_resp_fir(b_hann, 'FIR Hann', fig_fir_axes)
+calc_resp_fir(b_hamming, 'FIR Hamming', fig_fir_axes)
+
+# Agregar las leyendas a los ejes del gráfico conjunto
+ax_mod.legend(loc="lower left", fontsize=8)
+ax_fase.legend(loc="best", fontsize=9)
+
 
 #%% APLICACIÓN DE FILTROS A LA SEÑAL (Fase Cero) 
 ecg_filt_cheby2 = sig.sosfiltfilt(sos_cheby2, ecg_one_lead)
@@ -248,3 +259,27 @@ for ii in regs_interes_limpias:
     plt.tight_layout()
     plt.show()
     
+#%% 
+# ZOOM EN EL COMPLEJO QRS
+
+inicio_qrs = 4300
+fin_qrs    = 4450
+zoom_qrs   = np.arange(inicio_qrs, fin_qrs)
+
+plt.figure(figsize=(10, 5))
+
+# Señal original de referencia
+plt.plot(zoom_qrs, ecg_one_lead[zoom_qrs], label='ECG Original', linewidth=2.5, alpha=0.5, color='blue')
+
+# Filtros a comparar en el detalle
+plt.plot(zoom_qrs, ecg_filt_cheby2[zoom_qrs], label='IIR Chebyshev II', linewidth=1.5, color='darkorange')
+plt.plot(zoom_qrs, ecg_fir_hamming[zoom_qrs], label='FIR Hamming', linewidth=1.5, color='purple')
+plt.plot(zoom_qrs, ecg_fir_remez[zoom_qrs], label='FIR Remez', linewidth=1.5, color='crimson')
+
+plt.title('Zoom de Alta Resolución en el Complejo QRS (Retardo y Fase)')
+plt.ylabel('Adimensional')
+plt.xlabel('Muestras (#)')
+plt.legend(loc='upper right', fontsize=9)
+plt.grid(True, linestyle="--", alpha=0.6)
+plt.tight_layout()
+plt.show()
